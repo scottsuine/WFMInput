@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Processor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .result {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .flash-messages {
+            color: red;
+            margin-bottom: 20px;
+        }
+        .upload-form {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSV File Processor</h1>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="upload-form">
+            <form method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".csv">
+                <input type="submit" value="Upload and Process">
+            </form>
+        </div>
+
+        {% if result %}
+            <div class="result">
+                <h2>Results</h2>
+                <p><strong>Employee Name:</strong> {{ result.employee_name }}</p>
+                <p><strong>Customer Name:</strong> {{ result.customer_name }}</p>
+                <p><strong>Project Name:</strong> {{ result.project_name }}</p>
+                <p><strong>Project Code:</strong> {{ result.project_code }}</p>
+                <p><strong>Reimbursable Total:</strong> {{ result.reimbursable_total }}</p>
+                <p><strong>Report Number:</strong> {{ result.report_number }}</p>
+                <p><strong>Total Amount GST Free:</strong> {{ result.gst_free_total }}</p>
+                <p><strong>Total Amount GST Applicable:</strong> {{ result.gst_applicable_total }}</p>
+                <p><strong>Total GST:</strong> {{ result.total_gst }}</p>
+
+                <h3>GST Free Details:</h3>
+                <ul>
+                    {% for detail in result.gst_free_details %}
+                        <li>{{ detail }}, {{ result.gst_free_total }}</li>
+                    {% endfor %}
+                </ul>
+
+                <h3>GST Applicable Details:</h3>
+                <ul>
+                    {% for detail in result.gst_applicable_details %}
+                        <li>{{ detail }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html> 
