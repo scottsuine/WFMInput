@@ -35,7 +35,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>CSV File Processor</h1>
+        <h1>Osmodal - Expense Report Processor </h1>
+        <p>
+        <h3> Instructions </h3>
+        <ol>
+            <li>Export the expense file using the WFM template and choose csv</li>
+            <li>Choose the file and Click Upload and Process</li>
+            
+        </ol>
+        
         
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -57,29 +65,74 @@
         {% if result %}
             <div class="result">
                 <h2>Results</h2>
-                <p><strong>Employee Name:</strong> {{ result.employee_name }}</p>
-                <p><strong>Customer Name:</strong> {{ result.customer_name }}</p>
-                <p><strong>Project Name:</strong> {{ result.project_name }}</p>
-                <p><strong>Project Code:</strong> {{ result.project_code }}</p>
-                <p><strong>Reimbursable Total:</strong> {{ result.reimbursable_total }}</p>
-                <p><strong>Report Number:</strong> {{ result.report_number }}</p>
-                <p><strong>Total Amount GST Free:</strong> {{ result.gst_free_total }}</p>
-                <p><strong>Total Amount GST Applicable:</strong> {{ result.gst_applicable_total }}</p>
-                <p><strong>Total GST:</strong> {{ result.total_gst }}</p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: start;">
+                    <!-- First section labels -->
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <p style="margin: 0; height: 24px;"><strong>Employee Name:</strong></p>
+                        <p style="margin: 0; height: 24px;"><strong>Customer Name:</strong></p>
+                        <p style="margin: 0; height: 24px;"><strong>Project Name:</strong></p>
+                        <p style="margin: 0; height: 24px;"><strong>Project Code:</strong></p>
+                        <p style="margin: 0; height: 24px;"><strong>Report Number:</strong></p>
+                    </div>
 
-                <h3>GST Free Details:</h3>
+                    <!-- First section values -->
+                    <div style="display: flex; flex-direction: column; gap: 15px; text-align: right;">
+                        <p style="margin: 0; height: 24px;">{{ result.employee_name }}</p>
+                        <p style="margin: 0; height: 24px;">{{ result.customer_name }}</p>
+                        <p style="margin: 0; height: 24px;">{{ result.project_name }}</p>
+                        <p style="margin: 0; height: 24px;">{{ result.project_code }}</p>
+                        <p style="margin: 0; height: 24px;">{{ result.report_number }}</p>
+                    </div>
+
+                    <!-- Second section labels -->
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <p style="margin: 0; height: 24px;"><strong>GST Free Amount:</strong></p>
+                        <p style="margin: 0; height: 24px;"><strong>GST Applicable Amount:</strong></p>
+                        <p style="margin: 0; height: 24px;"><strong>Total GST:</strong></p>
+                        <p style="margin: 0; height: 24px;"><strong>Reimbursable Amount:</strong></p>
+                    </div>
+
+                    <!-- Second section values -->
+                    <div style="display: flex; flex-direction: column; gap: 15px; text-align: right;">
+                        <p style="margin: 0; height: 24px;">${{ "%.2f"|format(result.gst_free_total) }}</p>
+                        <p style="margin: 0; height: 24px;">${{ "%.2f"|format(result.gst_applicable_total) }}</p>
+                        <p style="margin: 0; height: 24px;">${{ "%.2f"|format(result.total_gst) }}</p>
+                        <p style="margin: 0; height: 24px;">${{ "%.2f"|format(result.reimbursable_total|float) }}</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    {% if (result.gst_free_total > 0 and result.gst_applicable_total == 0) or (result.gst_free_total == 0 and result.gst_applicable_total > 0) %}
+                        <p><strong>Note:</strong> We need to enter one entry into the cost form for job {{ result.project_code }}</p>
+                    {% elif result.gst_free_total > 0 and result.gst_applicable_total > 0 %}
+                        <p><strong>Note:</strong> We need to enter two cost entries for job {{ result.project_code }}</p>
+                    {% endif %}
+                </div>
+
+                {% if result.gst_free_total > 0 %}
+                <h4>Enter the following for GST Free entry in cost entry form</h4>
                 <ul>
                     {% for detail in result.gst_free_details %}
-                        <li>{{ detail }}, {{ result.gst_free_total }}</li>
+                        <li><strong>Cost Name:</strong> {{ detail }}</li>
+                        <li><strong>Date:</strong> {{ result.submitted_date }}</li>
+                        <li><strong>Unit Cost and Unit Price:</strong> ${{ "%.2f"|format(result.gst_free_total) }}</li>
+                        <li><strong>Supplier:</strong> {{ result.employee_name }}</li>
                     {% endfor %}
                 </ul>
+                {% endif %}
 
-                <h3>GST Applicable Details:</h3>
+                {% if result.gst_applicable_total > 0 %}
+                <h4>Enter the following for GST Applicable entry in cost entry form</h4>
                 <ul>
                     {% for detail in result.gst_applicable_details %}
-                        <li>{{ detail }}</li>
+                        <li><strong>Cost Name:</strong> {{ detail }}</li>
+                        <li><strong>Date:</strong> {{ result.submitted_date }}</li>
+                        <li><strong>Unit Cost and Unit Price:</strong> ${{ result.gst_applicable_total }}</li>
+                        <li><strong>Supplier:</strong> {{ result.employee_name }}</li>
+                      
                     {% endfor %}
                 </ul>
+                {% endif %}
             </div>
         {% endif %}
     </div>
