@@ -21,7 +21,7 @@ def process_csv(file_path):
             gst_applicable_total = 0.0
             total_gst = 0.0
             gst_free_details = []
-            gst_applicable_details = []
+            gst_applicable_details_set = set()
 
             # Extract the first row and iterate over all rows
             first_row = None
@@ -43,28 +43,31 @@ def process_csv(file_path):
                         ]
                     else:
                         gst_applicable_total += expense_total_without_tax
-                        gst_applicable_details.append(
+                        gst_applicable_details_set.add(
                             f"{row.get('Report Number', 'N/A')} - {row.get('Employee Name', 'N/A')} - Expenses - GST Applicable"
                         )
                 except ValueError:
                     continue
 
             if first_row:
+                # Convert set back to list for the result
+                gst_applicable_details = list(gst_applicable_details_set)
+                
                 # Parse and format the submitted date
                 submitted_date = first_row.get("Submitted Date", "N/A")
                 try:
-                    # Assuming the input date is in format 'YYYY-MM-DD' or similar
                     date_obj = datetime.strptime(submitted_date, '%Y-%m-%d')
                     formatted_date = date_obj.strftime('%d/%m/%Y')
                 except ValueError:
-                    formatted_date = submitted_date  # Keep original if parsing fails
+                    formatted_date = submitted_date
 
+                # Keep values as floats in the result dictionary
                 result = {
                     'employee_name': first_row.get("Employee Name", "N/A"),
                     'customer_name': first_row.get("Customer Name", "N/A"),
                     'project_name': first_row.get("Project Name", "N/A"),
                     'project_code': first_row.get("Project Code", "N/A"),
-                    'reimbursable_total': float(first_row.get("Reimbursable Total", "0")),
+                    'reimbursable_total': float(first_row.get('Reimbursable Total', '0')),
                     'report_number': first_row.get("Report Number", "N/A"),
                     'submitted_date': formatted_date,
                     'gst_free_total': gst_free_total,
